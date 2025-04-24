@@ -36,7 +36,7 @@ export const registerUser = async (
       email,
       password,
       sportCategory,
-      age,
+      yearOfBirth,
       region,
       city,
     } = req.body;
@@ -48,7 +48,7 @@ export const registerUser = async (
       email,
       password,
       sportCategory,
-      age,
+      yearOfBirth,
       region,
       city,
       role: UserRoleEnum.USER, // Regular user by default

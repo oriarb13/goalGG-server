@@ -8,6 +8,7 @@ import {
   basketballPositionsEnum,
   AccountStatusEnum,
 } from "../types/enums";
+const currentYear = new Date().getFullYear();
 
 // ממשק בסיסי משותף למשתמשים
 interface IUserBase extends Document {
@@ -18,7 +19,7 @@ interface IUserBase extends Document {
   image: string;
   positions: string[]; // יכיל עמדות כדורגל או כדורסל לפי ספורט קטגורי
   sportCategory: SportCategoryEnum;
-  age: number;
+  yearOfBirth: number;
   cm: number; // גובה בס"מ
   kg: number; // משקל בק"ג
   strongSide: StrongSideEnum;
@@ -114,7 +115,7 @@ export interface ISuperAdmin extends IUserBase {
   role: UserRoleEnum.SUPER_ADMIN;
   subscriptions: {
     groupIds: mongoose.Types.ObjectId[];
-    maxGroups: number; // unlimited 
+    maxGroups: number; // unlimited
     startDate: Date;
     endDate: Date;
     maxPlayers: number; // unlimited
@@ -176,11 +177,11 @@ const UserSchema: Schema = new Schema(
       },
       default: [],
     },
-    age: {
+    yearOfBirth: {
       type: Number,
-      required: [true, "Please provide your age"],
-      min: [8, "Age must be at least 8"],
-      max: [100, "Age must be at most 100"],
+      required: [true, "Please provide your yearOfBirth"],
+      min: [1930, "Year must be no earlier than 1930"],
+      max: [currentYear, "Year of birth cannot be in the future"],
     },
     cm: {
       type: Number,
