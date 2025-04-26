@@ -107,7 +107,7 @@ class UserService {
     }
 
     // נמנע עדכון של שדות רגישים באופן ישיר
-    const { password, role,subscriptions, ...safeUpdateData } = updateData;
+    const { password, role, subscriptions, ...safeUpdateData } = updateData;
 
     return await User.findByIdAndUpdate(id, safeUpdateData, {
       new: true,

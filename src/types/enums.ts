@@ -60,5 +60,3 @@ export enum GroupStatusEnum {
   INACTIVE = "inactive",
   FULL = "full",
 }
-
-
