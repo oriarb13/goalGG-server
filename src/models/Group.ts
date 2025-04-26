@@ -1,5 +1,9 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { SportCategoryEnum, GroupStatusEnum, UserRoleEnum } from "../types/enums";
+import {
+  SportCategoryEnum,
+  GroupStatusEnum,
+  UserRoleEnum,
+} from "../types/enums";
 
 // ==================== Group (קהילה) Schema ====================
 interface IGroup extends Document {
@@ -22,7 +26,7 @@ interface IGroup extends Document {
   status: GroupStatusEnum;
   maxPlayers: number; // הגבלה לפי סוג המנוי
   location: {
-    region: string;
+    country: string;
     city: string;
     address: string;
     lat: number;
@@ -114,7 +118,7 @@ const GroupSchema = new Schema<IGroup>(
       min: [2, "Group must allow at least 2 players"],
     },
     location: {
-      region: {
+      country: {
         type: String,
         trim: true,
       },

@@ -30,7 +30,7 @@ interface IUserBase extends Document {
     prefix: string;
     number: string;
   };
-  region: string;
+  country: string;
   city: string;
   password: string;
   accountStatus: AccountStatusEnum;
@@ -246,10 +246,10 @@ const UserSchema: Schema = new Schema(
       trim: true,
       maxlength: [30, "City name cannot be more than 30 characters"],
     },
-    region: {
+    country: {
       type: String,
       trim: true,
-      maxlength: [30, "Region name cannot be more than 30 characters"],
+      maxlength: [30, "country name cannot be more than 30 characters"],
     },
     password: {
       type: String,
