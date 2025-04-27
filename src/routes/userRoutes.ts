@@ -6,7 +6,7 @@ import {
   updateConnectedUser,
   getUsers,
   getUser,
-  getUsersByGroup,
+  getUsersByClub,
   getUsersByEvent,
   deleteUser,
   updateUserSubscription,
@@ -26,7 +26,7 @@ router.get("/getConnectedUser", getConnectedUser);
 router.put("/updateConnectedUser/:id", updateConnectedUser);
 
 // ניתובים לקבלת משתמשים
-router.get("/byGroup/:groupId", getUsersByGroup);
+router.get("/byClub/:clubId", getUsersByClub);
 router.get("/byEvent/:eventId", getUsersByEvent);
 router.get("/getAllUsers", getUsers);
 router.get("/getById/:id", getUser);

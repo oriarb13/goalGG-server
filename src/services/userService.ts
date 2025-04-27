@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import User from "../models/User";
-import Group from "../models/Group";
+import Club from "../models/Club";
 import Event from "../models/Event";
 import { AppError } from "../middleware/errorMiddleware";
-import { UserRoleEnum, GroupStatusEnum } from "../types/enums";
+import { UserRoleEnum, ClubStatusEnum } from "../types/enums";
 
 class UserService {
   /**
@@ -45,23 +45,23 @@ class UserService {
   }
 
   /**
-   * Get users by group ID
-   * @param groupId Group ID
-   * @returns Array of users in the group
+   * Get users by club ID
+   * @param clubId Club ID
+   * @returns Array of users in the club
    */
-  async getUsersByGroup(groupId: string) {
-    if (!mongoose.Types.ObjectId.isValid(groupId)) {
-      throw AppError.badRequest("Invalid group ID");
+  async getUsersByClub(clubId: string) {
+    if (!mongoose.Types.ObjectId.isValid(clubId)) {
+      throw AppError.badRequest("Invalid club ID");
     }
 
-    // Get the group to find all member IDs
-    const group = await Group.findById(groupId);
-    if (!group) {
-      throw AppError.notFound("Group not found");
+    // Get the club to find all member IDs
+    const club = await Club.findById(clubId);
+    if (!club) {
+      throw AppError.notFound("Club not found");
     }
 
     // Extract all user IDs from the members array
-    const memberIds = group.members.map((member) => member.userId);
+    const memberIds = club.members.map((member: any) => member.userId);
 
     // Fetch all users with those IDs
     return await User.find({ _id: { $in: memberIds } });
@@ -126,7 +126,7 @@ class UserService {
     }
 
     // Consider performing additional cleanup:
-    // 1. Remove user from groups they're a member of
+    // 1. Remove user from clubs they're a member of
     // 2. Remove user from events they're participating in
     // 3. Handle any pending requests
 
@@ -170,56 +170,56 @@ class UserService {
     }
 
     // Get subscription limits for the new role
-    let newMaxGroups = 0;
+    let newMaxClubs = 0;
     let newMaxPlayers = 0;
     let newCost = 0;
 
     switch (newRole) {
       case UserRoleEnum.SILVER:
-        newMaxGroups = 1;
+        newMaxClubs = 1;
         newMaxPlayers = 25;
         newCost = 15;
         break;
       case UserRoleEnum.GOLD:
-        newMaxGroups = 3;
+        newMaxClubs = 3;
         newMaxPlayers = 30;
         newCost = 25;
         break;
       case UserRoleEnum.PREMIUM:
-        newMaxGroups = 5;
+        newMaxClubs = 5;
         newMaxPlayers = 500;
         newCost = 40;
         break;
     }
 
-    // Check if downgrading is possible (enough group capacity)
+    // Check if downgrading is possible (enough club capacity)
     if (
-      newMaxGroups < currentSubscription.maxGroups &&
-      (currentSubscription.groupIds?.length || 0) > newMaxGroups
+      newMaxClubs < currentSubscription.maxClubs &&
+      (currentSubscription.clubIds?.length || 0) > newMaxClubs
     ) {
       throw AppError.badRequest(
         `Cannot downgrade: You have ${
-          currentSubscription.groupIds?.length || 0
-        } groups, but the new plan allows only ${newMaxGroups}`
+          currentSubscription.clubIds?.length || 0
+        } clubs, but the new plan allows only ${newMaxClubs}`
       );
     }
 
-    // Check each group the user owns to see if they exceed the new player limit
+    // Check each club the user owns to see if they exceed the new player limit
     if (newMaxPlayers < currentSubscription.maxPlayers) {
-      const groups = await Group.find({ admin: userId });
+      const clubs = await Club.find({ admin: userId });
 
-      for (const group of groups) {
-        if (group.members.length > newMaxPlayers) {
+      for (const club of clubs) {
+        if (club.members.length > newMaxPlayers) {
           throw AppError.badRequest(
-            `Cannot downgrade: Your group "${group.name}" has ${group.members.length} members, but the new plan allows only ${newMaxPlayers}`
+            `Cannot downgrade: Your club "${club.name}" has ${club.members.length} members, but the new plan allows only ${newMaxPlayers}`
           );
         }
       }
     }
 
     // If we got here, the subscription change is possible
-    // First, update all the groups owned by this user to have the new maxPlayers limit
-    await Group.updateMany(
+    // First, update all the clubs owned by this user to have the new maxPlayers limit
+    await Club.updateMany(
       { admin: userId },
       {
         maxPlayers: newMaxPlayers,
@@ -228,7 +228,7 @@ class UserService {
           status: {
             $cond: [
               { $gte: [{ $size: "$members" }, newMaxPlayers] },
-              GroupStatusEnum.FULL,
+              ClubStatusEnum.FULL,
               "$status",
             ],
           },
@@ -243,7 +243,7 @@ class UserService {
         role: newRole,
         subscriptions: {
           ...currentSubscription,
-          maxGroups: newMaxGroups,
+          maxClubs: newMaxClubs,
           maxPlayers: newMaxPlayers,
           cost: newCost,
           // Update dates for the new subscription period
@@ -258,15 +258,15 @@ class UserService {
   }
 
   /**
-   * Add group to admin's subscriptions
+   * Add club to admin's subscriptions
    * @param adminId Admin ID
-   * @param groupId Group ID
+   * @param clubId Club ID
    * @returns Updated admin or null if not found
    */
-  async addGroupToAdmin(adminId: string, groupId: string) {
+  async addClubToAdmin(adminId: string, clubId: string) {
     if (
       !mongoose.Types.ObjectId.isValid(adminId) ||
-      !mongoose.Types.ObjectId.isValid(groupId)
+      !mongoose.Types.ObjectId.isValid(clubId)
     ) {
       throw AppError.badRequest("Invalid ID format");
     }
@@ -291,48 +291,48 @@ class UserService {
 
     // בדיקה שהקבוצה כבר לא קיימת במנוי
     if (
-      admin.subscriptions?.groupIds?.includes(
-        new mongoose.Types.ObjectId(groupId)
+      admin.subscriptions?.clubIds?.includes(
+        new mongoose.Types.ObjectId(clubId)
       )
     ) {
       return null;
     }
 
     // בדיקה שמספר הקבוצות לא חורג מהמגבלה
-    const maxGroups = admin.subscriptions?.maxGroups || 0;
-    const currentGroupCount = admin.subscriptions?.groupIds?.length || 0;
+    const maxClubs = admin.subscriptions?.maxClubs || 0;
+    const currentClubCount = admin.subscriptions?.clubIds?.length || 0;
 
-    if (maxGroups > 0 && currentGroupCount >= maxGroups) {
+    if (maxClubs > 0 && currentClubCount >= maxClubs) {
       throw AppError.badRequest(
-        `Maximum number of groups (${maxGroups}) reached for this subscription`
+        `Maximum number of clubs (${maxClubs}) reached for this subscription`
       );
     }
 
     // הוספת הקבוצה למנוי
     return await User.findByIdAndUpdate(
       adminId,
-      { $addToSet: { "subscriptions.groupIds": groupId } },
+      { $addToSet: { "subscriptions.clubIds": clubId } },
       { new: true }
     );
   }
 
   /**
-   * Remove group from admin's subscriptions
+   * Remove club from admin's subscriptions
    * @param adminId Admin ID
-   * @param groupId Group ID
+   * @param clubId Club ID
    * @returns Updated admin or null if not found
    */
-  async removeGroupFromAdmin(adminId: string, groupId: string) {
+  async removeClubFromAdmin(adminId: string, clubId: string) {
     if (
       !mongoose.Types.ObjectId.isValid(adminId) ||
-      !mongoose.Types.ObjectId.isValid(groupId)
+      !mongoose.Types.ObjectId.isValid(clubId)
     ) {
       throw AppError.badRequest("Invalid ID format");
     }
 
     return await User.findByIdAndUpdate(
       adminId,
-      { $pull: { "subscriptions.groupIds": groupId } },
+      { $pull: { "subscriptions.clubIds": clubId } },
       { new: true }
     );
   }

@@ -4,7 +4,7 @@ import { SportCategoryEnum } from "../types/enums";
 // ממשק בסיסי למשחק
 interface IMatchBase extends Document {
   eventId: mongoose.Types.ObjectId;
-  groupId: mongoose.Types.ObjectId;
+  clubId: mongoose.Types.ObjectId;
   sportCategory: SportCategoryEnum;
   teams: [string, string];
   result: [number, number];
@@ -43,10 +43,10 @@ const MatchBaseSchemaFields = {
     ref: "Event",
     required: [true, "Please provide an event ID"],
   },
-  groupId: {
+  clubId: {
     type: Schema.Types.ObjectId,
-    ref: "Group",
-    required: [true, "Please provide a group ID"],
+    ref: "Club",
+    required: [true, "Please provide a club ID"],
   },
   sportCategory: {
     type: String,
@@ -146,8 +146,8 @@ const BasketballMatchSchema = new Schema(
 const MatchSchema = new Schema({}, { discriminatorKey: "sportCategory" });
 //index by eventId
 MatchSchema.index({ eventId: 1 });
-//index by groupId
-MatchSchema.index({ groupId: 1 });
+//index by clubId
+MatchSchema.index({ clubId: 1 });
 // יצירת המודל הבסיסי
 const Match = mongoose.model("Match", MatchSchema);
 

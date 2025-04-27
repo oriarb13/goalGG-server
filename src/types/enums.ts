@@ -55,7 +55,7 @@ export enum RequestStatusEnum {
   REJECTED = "rejected",
 }
 
-export enum GroupStatusEnum {
+export enum ClubStatusEnum {
   ACTIVE = "active",
   INACTIVE = "inactive",
   FULL = "full",

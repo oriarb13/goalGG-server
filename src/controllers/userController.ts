@@ -228,16 +228,16 @@ export const getUser = async (
   }
 };
 
-// @desc    Get users by group
-// @route   GET /api/users/byGroup/:groupId
+// @desc    Get users by club
+// @route   GET /api/users/byClub/:clubId
 // @access  Private
-export const getUsersByGroup = async (
+export const getUsersByClub = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const users = await userService.getUsersByGroup(req.params.groupId);
+    const users = await userService.getUsersByClub(req.params.clubId);
 
     res.status(200).json({
       success: true,

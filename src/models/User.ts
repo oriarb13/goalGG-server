@@ -41,16 +41,16 @@ interface IUserBase extends Document {
   favoriteFields: mongoose.Types.ObjectId[];
   friends: mongoose.Types.ObjectId[];
   friendRequests: mongoose.Types.ObjectId[];
-  groups: mongoose.Types.ObjectId[];
-  groupsRequests: mongoose.Types.ObjectId[];
+  clubs: mongoose.Types.ObjectId[];
+  clubsRequests: mongoose.Types.ObjectId[];
   totalStats: {
     totalGames: number;
     totalPoints: number;
     totalAssists: number;
   };
   subscriptions: {
-    groupIds: mongoose.Types.ObjectId[];
-    maxGroups: number;
+    clubIds: mongoose.Types.ObjectId[];
+    maxClubs: number;
     startDate?: Date;
     endDate?: Date;
     maxPlayers: number;
@@ -72,8 +72,8 @@ export interface IUser extends IUserBase {
 export interface ISilver extends IUserBase {
   role: UserRoleEnum.SILVER;
   subscriptions: {
-    groupIds: mongoose.Types.ObjectId[];
-    maxGroups: number; // 1
+    clubIds: mongoose.Types.ObjectId[];
+    maxClubs: number; // 1
     startDate: Date;
     endDate: Date;
     maxPlayers: number; // 25
@@ -86,8 +86,8 @@ export interface ISilver extends IUserBase {
 export interface IGold extends IUserBase {
   role: UserRoleEnum.GOLD;
   subscriptions: {
-    groupIds: mongoose.Types.ObjectId[];
-    maxGroups: number; // 3
+    clubIds: mongoose.Types.ObjectId[];
+    maxClubs: number; // 3
     startDate: Date;
     endDate: Date;
     maxPlayers: number; // 30
@@ -100,8 +100,8 @@ export interface IGold extends IUserBase {
 export interface IPremium extends IUserBase {
   role: UserRoleEnum.PREMIUM;
   subscriptions: {
-    groupIds: mongoose.Types.ObjectId[];
-    maxGroups: number; // 5
+    clubIds: mongoose.Types.ObjectId[];
+    maxClubs: number; // 5
     startDate: Date;
     endDate: Date;
     maxPlayers: number; // 500
@@ -114,8 +114,8 @@ export interface IPremium extends IUserBase {
 export interface ISuperAdmin extends IUserBase {
   role: UserRoleEnum.SUPER_ADMIN;
   subscriptions: {
-    groupIds: mongoose.Types.ObjectId[];
-    maxGroups: number; // unlimited
+    clubIds: mongoose.Types.ObjectId[];
+    maxClubs: number; // unlimited
     startDate: Date;
     endDate: Date;
     maxPlayers: number; // unlimited
@@ -281,14 +281,14 @@ const UserSchema: Schema = new Schema(
       ref: "User",
       default: [],
     },
-    groups: {
+    clubs: {
       type: [Schema.Types.ObjectId],
-      ref: "Group",
+      ref: "Club",
       default: [],
     },
-    groupsRequests: {
+    clubsRequests: {
       type: [Schema.Types.ObjectId],
-      ref: "Group",
+      ref: "Club",
       default: [],
     },
     totalStats: {
@@ -312,12 +312,12 @@ const UserSchema: Schema = new Schema(
     },
     // מנויים לסוגי המשתמשים השונים - מותאם לתמוך במבנה הממשקים
     subscriptions: {
-      groupIds: {
+      clubIds: {
         type: [Schema.Types.ObjectId],
-        ref: "Group",
+        ref: "Club",
         default: [],
       },
-      maxGroups: {
+      maxClubs: {
         type: Number,
         default: 0, // ערך ברירת מחדל קבוע במקום פונקציה
       },
@@ -376,28 +376,28 @@ UserSchema.pre("save", async function (this: UserDocument, next) {
     if (this.role === UserRoleEnum.SILVER) {
       this.subscriptions = {
         ...this.subscriptions,
-        maxGroups: 1,
+        maxClubs: 1,
         maxPlayers: 25,
         cost: 15,
       };
     } else if (this.role === UserRoleEnum.GOLD) {
       this.subscriptions = {
         ...this.subscriptions,
-        maxGroups: 3,
+        maxClubs: 3,
         maxPlayers: 30,
         cost: 25,
       };
     } else if (this.role === UserRoleEnum.PREMIUM) {
       this.subscriptions = {
         ...this.subscriptions,
-        maxGroups: 5,
+        maxClubs: 5,
         maxPlayers: 500,
         cost: 40,
       };
     } else if (this.role === UserRoleEnum.SUPER_ADMIN) {
       this.subscriptions = {
         ...this.subscriptions,
-        maxGroups: 1000,
+        maxClubs: 1000,
         maxPlayers: 1000,
         cost: 0,
       };

@@ -11,7 +11,7 @@ interface ITeam {
 interface IEvent extends Document {
   name: string;
   description: string;
-  groupId: mongoose.Types.ObjectId;
+  clubId: mongoose.Types.ObjectId;
   fieldId: mongoose.Types.ObjectId;
   location: {
     address: string;
@@ -47,10 +47,10 @@ const EventSchema = new Schema<IEvent>(
       trim: true,
       maxlength: [1000, "Description cannot be more than 1000 characters"],
     },
-    groupId: {
+    clubId: {
       type: Schema.Types.ObjectId,
-      ref: "Group",
-      required: [true, "Please provide a group ID"],
+      ref: "Club",
+      required: [true, "Please provide a club ID"],
     },
     fieldId: {
       type: Schema.Types.ObjectId,
@@ -122,8 +122,8 @@ const EventSchema = new Schema<IEvent>(
   }
 );
 
-//index by groupId
-EventSchema.index({ groupId: 1 });
+//index by clubId
+EventSchema.index({ clubId: 1 });
 
 //index by status
 EventSchema.index({ status: 1 });
