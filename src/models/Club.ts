@@ -24,6 +24,7 @@ interface IClub extends Document {
   sportCategory: SportCategoryEnum;
   image: string;
   status: ClubStatusEnum;
+  isPrivet: boolean;
   maxPlayers: number; // הגבלה לפי סוג המנוי
   location: {
     country: string;
@@ -111,6 +112,10 @@ const ClubSchema = new Schema<IClub>(
       type: String,
       enum: Object.values(ClubStatusEnum),
       default: ClubStatusEnum.ACTIVE,
+    },
+    isPrivet: {
+      type: Boolean,
+      default: false,
     },
     maxPlayers: {
       type: Number,
